@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Solar Production</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        .form-container {
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+         .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .form-label {
+            width: 40%;
+            text-align: left;
+            margin-right: 10px;
+        }
+
+        .form-input {
+            width: 60%;
+        }
+        .center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+    <script>
+        function toggleComboBox(checkboxId, comboBoxId) {
+            var checkbox = document.getElementById(checkboxId);
+            var comboBox = document.getElementById(comboBoxId);
+
+            comboBox.disabled = !checkbox.checked;
+        }
+
+        function validateForm() {
+            var inputSolar = document.getElementById("num_panels");
+            var maxSolar = parseInt(inputSolar.getAttribute("max"));
+            var minSolar = parseInt(inputSolar.getAttribute("min"));
+            var enteredSolar = parseInt(inputSolar.value);
+
+            var inputOrientation = document.getElementById("orientation");
+            var maxOrientation = parseInt(inputSolar.getAttribute("max"));
+            var minOrientation = parseInt(inputSolar.getAttribute("min"));
+            var enteredOrientation = parseInt(inputSolar.value);
+
+            var inputAngle = document.getElementById("angle");
+            var maxAngle = parseInt(inputAngle.getAttribute("max"));
+            var minAngle = parseInt(inputAngle.getAttribute("min"));
+            var enteredAngle = parseInt(inputAngle.value);
+
+
+            if (enteredSolar > maxSolar) {
+                alert("Solar panels cannot exceed the maximum value of " + maxSolar);
+                return false;
+            }
+
+            if (enteredSolar < minSolar) {
+                alert("Solar panels cannot be lower than minimum value of " + minSolar);
+                return false;
+            }
+            if (enteredOrientation > maxOrientation) {
+                alert("Orientation cannot exceed the maximum value of " + maxOrientation);
+                return false;
+            }
+
+            if (enteredOrientation < minOrientation) {
+                alert("Orientation cannot be lower than minimum value of " + minSolar);
+                return false;
+            }
+
+
+            if (enteredAngle > maxAngle) {
+                alert("Angle cannot exceed the maximum value of " + maxAngle);
+                return false;
+            }
+
+            if (enteredAngle < minAngle) {
+                alert("Angle cannot be lower than minimun value of " + minAngle);
+                return false;
+            }
+
+            return true;
+        }
+
+         window.onload = function() {
+            var today = new Date();
+            var minDate = new Date(today);
+            minDate.setDate(minDate.getDate() - 364);
+            var maxDate = new Date(today);
+            maxDate.setDate(maxDate.getDate() + 2);
+
+            var date = document.getElementById("date");
+            date.min = formatDate(minDate);
+            date.max = formatDate(maxDate);
+        };
+
+        function formatDate(date) {
+            var yyyy = date.getFullYear();
+            var mm = String(date.getMonth() + 1).padStart(2, "0");
+            var dd = String(date.getDate()).padStart(2, "0");
+            return yyyy + "-" + mm + "-" + dd;
+        }
+
+
+    </script>
+</head>
+<body>
+    <div class="form-container">
+        <h1 class="center">Solar Production Input</h1>
+        <form action="/submit" method="post" onsubmit="validateForm()">
+
+            <div class="form-group">
+                <label class="form-label" for="postcode">Postcode:</label>
+                <input class="form-input" type="text" id="postcode" name="postcode" placeholder="DD12HF" value="DD12HF" required><br><br>
+            </div>
+
+            <div class="form-group">
+            <label class="form-label" for="num_panels">N° of Solar Panels:</label>
+            <input class="form-input" type="number" id="num_panels" name="num_panels" placeholder="3" min="1" max="6" value="3" required><br><br>
+            </div>
+
+            <div class="form-group">
+            <label class="form-label" for="orientation">Orientation:</label>
+            <input class="form-input" type="text" id="orientation" name="orientation" placeholder="90" min="0" max="360" value="90" required><br><br>
+            </div>
+
+            <div class="form-group">
+            <label class="form-label" for="angle">Angle:</label>
+            <input class="form-input" type="number" id="angle" name="angle" placeholder="40" min="0" max="90" value="40" required><br><br>
+            </div>
+
+            <div class="form-group">
+            <label class="form-label" for="date">Date:</label>
+            <input class="form-label" type="date" id="date" name="date" value="2023-08-18" required><br><br>
+            </div>
+
+            <div class="form-group">
+            <label class="form-label" for="dishwasher">Dishwasher:</label>
+            <input class="form-input" type="checkbox" id="dishwasher" name="dishwasher" onchange="toggleComboBox('dishwasher', 'dishwasherCombo')">
+            <select id="dishwasherCombo" name="dishwasherCombo" disabled>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select><br><br>
+            </div>
+
+
+            <div class="form-group">
+            <label class="form-label" for="tumbleweed">Tumbleweed:</label>
+            <input class="form-input" type="checkbox" id="tumbleweed" name="tumbleweed" onchange="toggleComboBox('tumbleweed', 'tumbleweedCombo')">
+            <select id="tumbleweedCombo" name="tumbleweedCombo" disabled>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select><br><br>
+            </div>
+
+
+            <div class="form-group">
+            <label class="form-label" for="washing_machine">Washing Machine:</label>
+            <input class="form-input" type="checkbox" id="washing_machine" name="washing_machine" onchange="toggleComboBox('washing_machine', 'washingMachineCombo')">
+            <select id="washingMachineCombo" name="washingMachineCombo" disabled >
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select><br><br>
+            </div>
+
+            <div class="center">
+                <input type="submit" value="Submit">
+            </div>
+
+        </form>
+    </div>
+</body>
+</html>

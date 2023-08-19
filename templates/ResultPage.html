@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Slider Example</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('input[type="range"]').on('input', function() {
+                var sliderValue = $(this).val();
+                $('#slider-value').text(sliderValue);
+                $.ajax({
+                    type: 'POST',
+                    url: '/update_slider',
+                    data: { slider_value: sliderValue },
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Slider Example</h1>
+    <input type="range" name="slider_value" min="0" max="22" value="50" step="1">
+    <p>Slider Value: <span id="slider-value">50</span></p>
+
+    <img src="data:image/png;base64,{{ encoded_image }}" alt="Plot">
+</body>
+</html>
