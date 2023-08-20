@@ -18,8 +18,17 @@ from pvlib.pvsystem import PVSystem
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 import matplotlib.dates as mdates
 import time as t
-
 from timezonefinder import TimezoneFinder
+
+list_of_production_origin_global = list()
+list_of_consumption_dishwasher_global = list()
+list_of_consumption_washingmachine_global = list()
+list_of_consumption_tumbleweed_global = list()
+title_global = str()
+max_hour_dishwasher_global = int()
+max_hour_washingmachine_global = int()
+max_hour_tumbleweed_global = int()
+priority_dict = dict()
 
 
 def get_location(postcode):
@@ -82,6 +91,15 @@ def set_up_clearsky(location, time_range):
 
 def main(postcode, nSolar, orientation, angle, date, dishwasherBool, dishwasherPriority, tumbleweedBool,
          tumbleweedPriority, washingmachineBool, washingmachinePriority):
+    global list_of_production_origin_global
+    global list_of_consumption_dishwasher_global
+    global list_of_consumption_washingmachine_global
+    global list_of_consumption_tumbleweed_global
+    global title_global
+    global max_hour_dishwasher_global
+    global max_hour_washingmachine_global
+    global max_hour_tumbleweed_global
+    global priority_dict
 
     max_hour_dishwasher = 50
     max_hour_washingmachine = 50
@@ -104,13 +122,13 @@ def main(postcode, nSolar, orientation, angle, date, dishwasherBool, dishwasherP
     sorted_priorities = sorted(dictionary_of_priorities.items(), key=custom_priority_sort)
 
     sorted_dictionary = dict(sorted_priorities)
+    priority_dict = sorted_dictionary
 
     location = get_location(postcode)
     system = set_up_system(nSolar, orientation, angle)
     modelchain = set_up_modelchain(system, location)
     energy, list_of_production = calculate_actual_solar_energy(date, replace_day(date, date.day + 1), modelchain)
 
-    # fare priorità
     list_of_production_origin = list_of_production
 
     list_of_consumption_dishwasher = [1.92, 79.93, 307.88, 6.52, 6.1, 6.47, 7.17, 7.23, 7.68, 162.3, 285.72, 9.22]
@@ -122,27 +140,38 @@ def main(postcode, nSolar, orientation, angle, date, dishwasherBool, dishwasherP
             max_hour_dishwasher, list_of_production = calculate_optimal_time(list_of_consumption_dishwasher,
                                                                              list_of_production)
         if booleanCheck == "on" and device == "tumbleweed":
-            max_hour_tumbleweed, list_of_production = calculate_optimal_time(list_of_consumption_tumbleweed, list_of_production)
+            max_hour_tumbleweed, list_of_production = calculate_optimal_time(list_of_consumption_tumbleweed,
+                                                                             list_of_production)
 
         if booleanCheck == "on" and device == "washingmachine":
-            max_hour_washingmachine, list_of_production = calculate_optimal_time(list_of_consumption_washingmachine,list_of_production)
-
-
-    # max_hour_dishwasher, list_of_production = calculate_optimal_time(list_of_consumption_dishwasher, list_of_production)
-    # max_hour_tumbleweed, list_of_production = calculate_optimal_time(list_of_consumption_tumbleweed, list_of_production)
-    # max_hour_washingmachine, list_of_production = calculate_optimal_time(list_of_consumption_washingmachine,
-    #                                                                      list_of_production)
+            max_hour_washingmachine, list_of_production = calculate_optimal_time(list_of_consumption_washingmachine,
+                                                                                 list_of_production)
 
     plot_graph(list_of_production_origin, list_of_consumption_dishwasher, list_of_consumption_washingmachine,
-                     list_of_consumption_tumbleweed, "List of Production After Consumption"+ str(date), max_hour_dishwasher,
-                     max_hour_washingmachine, max_hour_tumbleweed)
+               list_of_consumption_tumbleweed, "List of Production After Consumption" + str(date), max_hour_dishwasher,
+               max_hour_washingmachine, max_hour_tumbleweed)
+
+    list_of_production_origin_global = list_of_production_origin
+    list_of_consumption_dishwasher_global = list_of_consumption_dishwasher
+    list_of_consumption_washingmachine_global = list_of_consumption_washingmachine
+    list_of_consumption_tumbleweed_global = list_of_consumption_tumbleweed
+    title_global = "List of Production After Consumption" + str(date)
+    max_hour_dishwasher_global = max_hour_dishwasher
+    max_hour_washingmachine_global = max_hour_washingmachine
+    max_hour_tumbleweed_global = max_hour_tumbleweed
+
+    encoded_image = graph_to_image()
+
+    return energy, encoded_image, list_of_production
+
+
+def graph_to_image():
     buffer = io.BytesIO()
     plt.savefig(buffer, format='png')
     plt.close()
     buffer.seek(0)
     encoded_image = base64.b64encode(buffer.read()).decode('utf-8')
-
-    return energy, encoded_image
+    return encoded_image
 
 
 def calculate_actual_solar_energy(initial_date, final_date, modelchain):
@@ -193,39 +222,6 @@ def calculate_difference_between_times(datetime1, datetime2):
     diff = datetime2 - datetime1
     hours = diff.total_seconds() / 3600
     return hours
-
-
-# def calculate_difference_between_times(initial_date: datetime, final_date: datetime):
-#     initial_hour = initial_date.hour
-#     final_hour = final_date.hour
-#     hour_difference = final_hour - initial_hour
-#     return hour_difference
-
-
-# def callToWeatherAPI(initial_date: datetime, final_date: datetime):
-#     location = get_location()
-#     inital_date_utc = convert_to_utc(initial_date, location.tz)
-#     final_date_utc = convert_to_utc(final_date, location.tz)
-#     initial_time = str(inital_date_utc).replace(' ', ':')[:-6]
-#     final_time = str(final_date_utc).replace(' ', ':')[:-6]
-#     latitude = str(location.latitude)
-#     longitude = str(location.longitude)
-#     url = 'https://api.weatherbit.io/v2.0/history/hourly?lat='+latitude+'&lon='+longitude+'&' \
-#           'start_date='+initial_time+'&end_date='+final_time+'&tz=utc&key=692afbc7b1184804b4598a5998ddf629'
-#     #ipdb.set_trace()
-#     # url = 'https://api.weatherbit.io/v2.0/history/hourly?lat=56.64482956171486&lon=-2.888728934975756&' \
-#     #        'start_date=2023-05-12:00&end_date=2023-05-13:00&tz=local&key=692afbc7b1184804b4598a5998ddf629'
-#     response = requests.get(url)
-#
-#     if response.status_code == 200:
-#         data = response.json()
-#         list_of_cloudiness = []
-#         for entry in data['data']:
-#             clouds = entry['clouds']
-#             list_of_cloudiness.append(clouds)
-#         return list_of_cloudiness
-#     else:
-#         print('Error:', response.status_code)
 
 
 def callToWeatherAPIPast(initial_date: datetime, final_date: datetime):
@@ -343,11 +339,11 @@ def plot_graph(list_of_production, dishwasher, washingmachine, tumbleweed, title
         tumbleweed = [0] * (max_hour_tumbleweed + 1) + tumbleweed + [0] * (23 - max_hour_tumbleweed - len(tumbleweed))
     plt.plot(hours, list_of_production, label='Curve Of Production')
     if max_hour_dishwasher != 50:
-        plt.plot(hours, dishwasher, label='Curve Of Consumption Dishwasher')
+        plt.plot(hours, dishwasher, color="orange", label='Curve Of Consumption Dishwasher')
     if max_hour_washingmachine != 50:
-        plt.plot(hours, washingmachine, label='Curve Of Consumption Washing Maching')
+        plt.plot(hours, washingmachine, color="green", label='Curve Of Consumption Washing Maching')
     if max_hour_tumbleweed != 50:
-        plt.plot(hours, tumbleweed, label='Curve Of Consumption Tumbleweed')
+        plt.plot(hours, tumbleweed, color="red", label='Curve Of Consumption Tumbleweed')
 
     plt.xlabel('Hours')
     plt.ylabel('Watts')
@@ -452,3 +448,30 @@ def shrink_list_by_number_and_average(list):
         avg = sum(subset) / len(subset)
         averages.append(avg)
     return averages
+
+
+def get_resulting_production(list_of_production, dishwasher, washingmachine, tumbleweed, start_hour_dishwasher,
+                             start_hour_washingmachine, start_hour_tumbleweed):
+
+    for device, (booleanCheck, priority) in priority_dict.items():
+        if booleanCheck == "on" and device == "dishwasher":
+            list_of_production = get_production_after_consumption(list_of_production, dishwasher,
+                                                                  start_hour_dishwasher)
+        if booleanCheck == "on" and device == "tumbleweed":
+            list_of_production = get_production_after_consumption(list_of_production, tumbleweed,
+                                                                  start_hour_tumbleweed)
+
+        if booleanCheck == "on" and device == "washingmachine":
+            list_of_production = get_production_after_consumption(list_of_production, washingmachine,
+                                                                  start_hour_washingmachine)
+
+    return list_of_production
+
+
+def get_production_after_consumption(list_of_production, list_of_consumption, start):
+    list_of_production_copy = list(list_of_production)
+    list_of_consumption = shrink_list_by_number_and_average(list_of_consumption)
+    list_of_production_copy[start] -= list_of_consumption[0]
+    list_of_production_copy[start+1] -= list_of_consumption[1]
+
+    return list_of_production_copy

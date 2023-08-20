@@ -5,23 +5,101 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('input[type="range"]').on('input', function() {
-                var sliderValue = $(this).val();
-                $('#slider-value').text(sliderValue);
+
+        var last_slider_value = null
+        if (elementExists("span_dishwasher"))
+            $('#span_dishwasher').text({{ max_dishwasher }});
+        if (elementExists("span_washingmachine"))
+            $('#span_washingmachine').text({{ max_washingmachine }});
+        if (elementExists("span_tumbleweed"))
+            $('#span_tumbleweed').text({{ max_tumbleweed}});
+
+            function update_graph(slider){
+                var sliderValue = slider.val()
+                if (elementExists("span_dishwasher"))
+                    $('#span_dishwasher').text(get_slider_value("slider_dishwasher"));
+                if (elementExists("span_washingmachine"))
+                    $('#span_washingmachine').text(get_slider_value("slider_washingmachine"));
+                if (elementExists("span_tumbleweed"))
+                    $('#span_tumbleweed').text(get_slider_value("slider_tumbleweed"));
                 $.ajax({
                     type: 'POST',
                     url: '/update_slider',
-                    data: { slider_value: sliderValue },
+                    data: { slider_dishwasher: get_slider_value("slider_dishwasher"),
+                            slider_washingmachine: get_slider_value("slider_washingmachine"),
+                            slider_tumbleweed: get_slider_value("slider_tumbleweed")},
+                    success: function (response){$("#graph1").attr("src", "data:image/png;base64," + response);},
                 });
+            }
+
+            function update_resulting_graph(){
+                $.ajax({
+                    type: 'POST',
+                    url: '/update_resulting_graph',
+                    data: { slider_dishwasher: get_slider_value("slider_dishwasher"),
+                            slider_washingmachine: get_slider_value("slider_washingmachine"),
+                            slider_tumbleweed: get_slider_value("slider_tumbleweed")},
+                            success: function(response) {$("#graph2").attr("src", "data:image/png;base64," + response);
+                    }
+                });
+}
+
+            $('input[type="range"]').on('input', function() {
+                last_slider_value = $(this)
             });
+
+            function check_slider_change(){
+                if(last_slider_value == null){
+                    return
+                }
+                update_graph(last_slider_value)
+                last_slider_value = null
+            }
+
+            setInterval(check_slider_change, 500);
+
+            function get_slider_value(id){
+                if(elementExists(id)){
+                    return $("#"+ id).val()
+                }else{
+                    return 50
+                }
+            }
+
+            function elementExists(elementId) {
+                return document.getElementById(elementId) !== null;
+            }
+            document.getElementById("resetButton").addEventListener("click", function() {
+                location.reload();
+            });
+
+            document.getElementById("recalculateButton").addEventListener("click", function() {
+                update_resulting_graph();
+            });
+
         });
     </script>
 </head>
 <body>
-    <h1>Slider Example</h1>
-    <input type="range" name="slider_value" min="0" max="22" value="50" step="1">
-    <p>Slider Value: <span id="slider-value">50</span></p>
+    <img id="graph1" src="data:image/png;base64,{{ encoded_image }}" alt="Plot">
+    <img id="graph2" src="data:image/png;base64,{{ resulted_graph }}" alt="Plot">
+    <button id="resetButton">Reset To Optimal Time</button>
+    <button id="recalculateButton">Calculate Graph</button>
+    {% if max_dishwasher != 50 %}
+        <h1>Slider Dishwasher</h1>
+        <input type="range" id="slider_dishwasher" name="slider_dishwasher" min="0" max="21" value="{{ max_dishwasher }}" step="1">
+        <p>Slider Value: <span id="span_dishwasher"></span></p>
+    {% endif %}
+    {% if max_washingmachine != 50 %}
+        <h1>Slider Washing Machine</h1>
+        <input type="range" id="slider_washingmachine" name="slider_washingmachine" min="0" max="21" value="{{ max_washingmachine }}" step="1">
+        <p>Slider Value: <span id="span_washingmachine"></span></p>
+    {% endif %}
+    {% if max_tumbleweed !=50 %}
+        <h1>Slider Tumbleweed</h1>
+        <input type="range" id="slider_tumbleweed" name="slider_tumbleweed" min="0" max="21" value="{{ max_tumbleweed }}" step="1">
+        <p>Slider Value: <span id="span_tumbleweed"></span></p>
+    {% endif %}
 
-    <img src="data:image/png;base64,{{ encoded_image }}" alt="Plot">
 </body>
 </html>
