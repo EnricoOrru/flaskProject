@@ -135,6 +135,10 @@ def main(postcode, nSolar, orientation, angle, date, dishwasherBool, dishwasherP
     list_of_consumption_tumbleweed = [1.92, 79.93, 307.88, 6.52, 6.1, 6.47, 7.17, 7.23, 7.68, 162.3, 285.72, 9.22]
     list_of_consumption_washingmachine = [0, 1, 0.18, 13.05, 20.62, 18.12, 11.62, 11.88, 82.38, 358.22, 1, 0]
 
+    list_of_consumption_dishwasher = multiply_list_by_number(list_of_consumption_dishwasher, 6)
+    list_of_consumption_tumbleweed = multiply_list_by_number(list_of_consumption_tumbleweed, 6)
+    list_of_consumption_washingmachine = multiply_list_by_number(list_of_consumption_washingmachine, 6)
+
     for device, (booleanCheck, priority) in sorted_dictionary.items():
         if booleanCheck == "on" and device == "dishwasher":
             max_hour_dishwasher, list_of_production = calculate_optimal_time(list_of_consumption_dishwasher,
@@ -212,7 +216,7 @@ def calculate_actual_solar_energy(initial_date, final_date, modelchain):
         modelchain.run_model(clear_sky)
         cloud_cover = (1 - (get_dissipation_value(list_of_cloudiness[i]) / 100))
         energy += modelchain.results.ac.values[0] * cloud_cover
-        list.append(modelchain.results.ac.values[0])
+        list.append(modelchain.results.ac.values[0] * cloud_cover)
         initial_date = addHours(initial_date, 1)
         final_date = addHours(final_date, 1)
     return energy, list
@@ -257,7 +261,7 @@ def callToWeatherAPIFuture(desired_local_start_time):
         desidered_time = unix_times[0]
         for time in unix_times:
             time_in_utc = unix_timestamp_to_utc(time)
-            time_localized = convert_utc_to_timezone(time_in_utc, calculateTimezoneFromLocation(location))
+            time_localized = convert_utc_to_timezone(time_in_utc, calculateTimezoneFromLocation(location.latitude, location.longitude))
             if (
                     time_localized.day == desired_local_start_time.day and time_localized.hour == desired_local_start_time.hour):
                 desidered_time = time
@@ -305,7 +309,7 @@ def addHours(input_date: datetime, hours):
 
 
 def get_dissipation_value(cloudiness):
-    value = (25 * cloudiness) / 100
+    value = (75 * cloudiness) / 100
     return value
 
 
@@ -475,3 +479,15 @@ def get_production_after_consumption(list_of_production, list_of_consumption, st
     list_of_production_copy[start+1] -= list_of_consumption[1]
 
     return list_of_production_copy
+
+
+def multiply_list_by_number(lst, number):
+    multiplied_list = [element * number for element in lst]
+    return multiplied_list
+
+
+
+
+
+
+

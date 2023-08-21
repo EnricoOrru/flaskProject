@@ -3,6 +3,7 @@ import datetime
 import ipdb
 import matplotlib.pyplot as plt
 from flask import Flask, render_template, request
+from flask_bootstrap import Bootstrap
 import SolarProduction
 
 app = Flask(__name__)
