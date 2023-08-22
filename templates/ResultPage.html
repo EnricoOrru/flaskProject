@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <title>Slider Example</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
 
-        var last_slider_value = null
-        if (elementExists("span_dishwasher"))
-            $('#span_dishwasher').text({{ max_dishwasher }});
-        if (elementExists("span_washingmachine"))
-            $('#span_washingmachine').text({{ max_washingmachine }});
-        if (elementExists("span_tumbleweed"))
-            $('#span_tumbleweed').text({{ max_tumbleweed}});
+            var last_slider_value = null
+            if (elementExists("span_dishwasher"))
+                $('#span_dishwasher').text({{ max_dishwasher }});
+            if (elementExists("span_washingmachine"))
+                $('#span_washingmachine').text({{ max_washingmachine }});
+            if (elementExists("span_tumbleweed"))
+                $('#span_tumbleweed').text({{ max_tumbleweed}});
 
-            function update_graph(slider){
+            function update_graph(slider) {
                 var sliderValue = slider.val()
                 if (elementExists("span_dishwasher"))
                     $('#span_dishwasher').text(get_slider_value("slider_dishwasher"));
@@ -26,31 +27,38 @@
                 $.ajax({
                     type: 'POST',
                     url: '/update_slider',
-                    data: { slider_dishwasher: get_slider_value("slider_dishwasher"),
-                            slider_washingmachine: get_slider_value("slider_washingmachine"),
-                            slider_tumbleweed: get_slider_value("slider_tumbleweed")},
-                    success: function (response){$("#graph1").attr("src", "data:image/png;base64," + response);},
+                    data: {
+                        slider_dishwasher: get_slider_value("slider_dishwasher"),
+                        slider_washingmachine: get_slider_value("slider_washingmachine"),
+                        slider_tumbleweed: get_slider_value("slider_tumbleweed")
+                    },
+                    success: function (response) {
+                        $("#graph1").attr("src", "data:image/png;base64," + response);
+                    },
                 });
             }
 
-            function update_resulting_graph(){
+            function update_resulting_graph() {
                 $.ajax({
                     type: 'POST',
                     url: '/update_resulting_graph',
-                    data: { slider_dishwasher: get_slider_value("slider_dishwasher"),
-                            slider_washingmachine: get_slider_value("slider_washingmachine"),
-                            slider_tumbleweed: get_slider_value("slider_tumbleweed")},
-                            success: function(response) {$("#graph2").attr("src", "data:image/png;base64," + response);
+                    data: {
+                        slider_dishwasher: get_slider_value("slider_dishwasher"),
+                        slider_washingmachine: get_slider_value("slider_washingmachine"),
+                        slider_tumbleweed: get_slider_value("slider_tumbleweed")
+                    },
+                    success: function (response) {
+                        $("#graph2").attr("src", "data:image/png;base64," + response);
                     }
                 });
-}
+            }
 
-            $('input[type="range"]').on('input', function() {
+            $('input[type="range"]').on('input', function () {
                 last_slider_value = $(this)
             });
 
-            function check_slider_change(){
-                if(last_slider_value == null){
+            function check_slider_change() {
+                if (last_slider_value == null) {
                     return
                 }
                 update_graph(last_slider_value)
@@ -59,10 +67,10 @@
 
             setInterval(check_slider_change, 500);
 
-            function get_slider_value(id){
-                if(elementExists(id)){
-                    return $("#"+ id).val()
-                }else{
+            function get_slider_value(id) {
+                if (elementExists(id)) {
+                    return $("#" + id).val()
+                } else {
                     return 50
                 }
             }
@@ -70,37 +78,109 @@
             function elementExists(elementId) {
                 return document.getElementById(elementId) !== null;
             }
-            document.getElementById("resetButton").addEventListener("click", function() {
+
+            document.getElementById("resetButton").addEventListener("click", function () {
                 location.reload();
             });
 
-            document.getElementById("recalculateButton").addEventListener("click", function() {
+            document.getElementById("recalculateButton").addEventListener("click", function () {
                 update_resulting_graph();
             });
 
         });
     </script>
 </head>
+<style>
+
+    img {
+        max-width: 70%;
+        margin-bottom: 20px;
+        margin-left: 5%;
+    }
+
+    button {
+        font-size: 65%;
+        background-color: #3e87b9;
+        border: none;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 18%;
+        height: 11%;
+    }
+
+    button:hover {
+        background-color: #306a8d;
+    }
+
+    .sliders {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        margin-left: 4%
+    }
+
+    .form-container {
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+</style>
 <body>
-    <img id="graph1" src="data:image/png;base64,{{ encoded_image }}" alt="Plot">
-    <img id="graph2" src="data:image/png;base64,{{ resulted_graph }}" alt="Plot">
-    <button id="resetButton">Reset To Optimal Time</button>
-    <button id="recalculateButton">Calculate Graph</button>
-    {% if max_dishwasher != 50 %}
-        <h1>Slider Dishwasher</h1>
-        <input type="range" id="slider_dishwasher" name="slider_dishwasher" min="0" max="21" value="{{ max_dishwasher }}" step="1">
-        <p>Slider Value: <span id="span_dishwasher"></span></p>
-    {% endif %}
-    {% if max_washingmachine != 50 %}
-        <h1>Slider Washing Machine</h1>
-        <input type="range" id="slider_washingmachine" name="slider_washingmachine" min="0" max="21" value="{{ max_washingmachine }}" step="1">
-        <p>Slider Value: <span id="span_washingmachine"></span></p>
-    {% endif %}
-    {% if max_tumbleweed !=50 %}
-        <h1>Slider Tumbleweed</h1>
-        <input type="range" id="slider_tumbleweed" name="slider_tumbleweed" min="0" max="21" value="{{ max_tumbleweed }}" step="1">
-        <p>Slider Value: <span id="span_tumbleweed"></span></p>
-    {% endif %}
+<div class="form-container">
+<br>
+<br>
+<br>
+<br>
+<div class="row">
+    <div class="col-md-6">
+        <img id="graph1" src="data:image/png;base64,{{ encoded_image }}" alt="Plot">
+        <button id="recalculateButton">Calculate Graph</button>
+    </div>
+    <div class="col-md-6">
+        <img id="graph2" src="data:image/png;base64,{{ resulted_graph }}" alt="Plot">
+        <button id="resetButton">Reset Optimal Time</button>
+    </div>
+</div>
+<div class="row">
+    <div class="sliders">
+        <div class="col-md-3">
+            {% if max_dishwasher != 50 %}
+                <p>Dishwasher</p>
+                <input type="range" id="slider_dishwasher" name="slider_dishwasher" min="0" max="21"
+                       value="{{ max_dishwasher }}" step="1">
+                <p><span id="span_dishwasher"></span></p>
+            {% endif %}
+        </div>
+
+        <div class="col-md-3">
+            {% if max_washingmachine != 50 %}
+                <p>Washing Machine</p>
+                <input type="range" id="slider_washingmachine" name="slider_washingmachine" min="0" max="21"
+                       value="{{ max_washingmachine }}" step="1">
+                <p><span id="span_washingmachine"></span></p>
+            {% endif %}
+        </div>
+
+        <div class="col-md-3">
+            {% if max_tumbleweed !=50 %}
+                <p>Tumbleweed</p>
+                <input type="range" id="slider_tumbleweed" name="slider_tumbleweed" min="0" max="21"
+                       value="{{ max_tumbleweed }}" step="1">
+                <p><span id="span_tumbleweed"></span></p>
+            {% endif %}
+        </div>
+    </div>
+
+
+</div>
+</div>
+
 
 </body>
 </html>
