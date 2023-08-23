@@ -28,6 +28,10 @@ def submit():
     washingmachineBool = request.form.get('washing_machine')
     washingmachinePriority = request.form.get('washingMachineCombo')
 
+    today = datetime.datetime.today()
+    if date.date() == today.date():
+        return render_template('ErrorPage.html')
+
     energy, graph, resulted_production = SolarProduction.main(postcode, nSolar, orientation, angle, date, dishwasherBool
                                                               , dishwasherPriority, tumbleweedBool, tumbleweedPriority,
                                                               washingmachineBool, washingmachinePriority)
