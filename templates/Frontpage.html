@@ -141,15 +141,19 @@
 
          window.onload = function() {
             var today = new Date();
+            var df = new Date()
             var minDate = new Date(today);
             minDate.setDate(minDate.getDate() - 364);
             var maxDate = new Date(today);
             maxDate.setDate(maxDate.getDate() + 2);
+            df.setDate(df.getDate() - 1);
 
             var date = document.getElementById("date");
             date.min = formatDate(minDate);
             date.max = formatDate(maxDate);
+            date.value = formatDate(df)
         };
+
 
         function formatDate(date) {
             var yyyy = date.getFullYear();
@@ -157,7 +161,6 @@
             var dd = String(date.getDate()).padStart(2, "0");
             return yyyy + "-" + mm + "-" + dd;
         }
-
 
     </script>
 </head>
@@ -188,7 +191,7 @@
 
             <div class="form-group">
             <label class="form-label" for="date">Date:</label>
-            <input class="form-label" type="date" id="date" name="date" value="2023-08-18" required><br><br>
+            <input class="form-label" type="date" id="date" name="date" required><br><br>
             </div>
 
             <div class="form-group">

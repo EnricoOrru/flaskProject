@@ -91,6 +91,13 @@
     </script>
 </head>
 <style>
+    body {
+        margin: 0;
+        background-image: url('../static/background_front_page.jpg');
+        background-size: cover;
+        font-family: 'Raleway', sans-serif;
+        overflow-x: hidden;
+        }
 
     img {
         max-width: 70%;
@@ -125,62 +132,57 @@
     }
 
     .form-container {
-            padding: 20px;
+            padding: 5px;
             background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 6%;
         }
 </style>
 <body>
-<div class="form-container">
-<br>
-<br>
-<br>
-<br>
-<div class="row">
-    <div class="col-md-6">
-        <img id="graph1" src="data:image/png;base64,{{ encoded_image }}" alt="Plot">
-        <button id="recalculateButton">Calculate Graph</button>
-    </div>
-    <div class="col-md-6">
-        <img id="graph2" src="data:image/png;base64,{{ resulted_graph }}" alt="Plot">
-        <button id="resetButton">Reset Optimal Time</button>
-    </div>
-</div>
-<div class="row">
-    <div class="sliders">
-        <div class="col-md-3">
-            {% if max_dishwasher != 50 %}
-                <p>Dishwasher</p>
-                <input type="range" id="slider_dishwasher" name="slider_dishwasher" min="0" max="21"
-                       value="{{ max_dishwasher }}" step="1">
-                <p><span id="span_dishwasher"></span></p>
-            {% endif %}
+    <div class="form-container">
+        <div class="row">
+            <div class="col-md-6">
+                <img id="graph1" src="data:image/png;base64,{{ encoded_image }}" alt="Plot">
+                <button id="recalculateButton">Calculate Graph</button>
+            </div>
+            <div class="col-md-6">
+                <img id="graph2" src="data:image/png;base64,{{ resulted_graph }}" alt="Plot">
+                <button id="resetButton">Reset Optimal Time</button>
+            </div>
         </div>
+        <div class="row">
+            <div class="sliders">
+                <div class="col-md-3">
+                    {% if max_dishwasher != 50 %}
+                        <p>Dishwasher</p>
+                        <input type="range" id="slider_dishwasher" name="slider_dishwasher" min="0" max="21"
+                               value="{{ max_dishwasher }}" step="1">
+                        <p><span id="span_dishwasher"></span></p>
+                    {% endif %}
+                </div>
 
-        <div class="col-md-3">
-            {% if max_washingmachine != 50 %}
-                <p>Washing Machine</p>
-                <input type="range" id="slider_washingmachine" name="slider_washingmachine" min="0" max="21"
-                       value="{{ max_washingmachine }}" step="1">
-                <p><span id="span_washingmachine"></span></p>
-            {% endif %}
-        </div>
+                <div class="col-md-3">
+                    {% if max_washingmachine != 50 %}
+                        <p>Washing Machine</p>
+                        <input type="range" id="slider_washingmachine" name="slider_washingmachine" min="0" max="21"
+                               value="{{ max_washingmachine }}" step="1">
+                        <p><span id="span_washingmachine"></span></p>
+                    {% endif %}
+                </div>
 
-        <div class="col-md-3">
-            {% if max_tumbleweed !=50 %}
-                <p>Tumbleweed</p>
-                <input type="range" id="slider_tumbleweed" name="slider_tumbleweed" min="0" max="21"
-                       value="{{ max_tumbleweed }}" step="1">
-                <p><span id="span_tumbleweed"></span></p>
-            {% endif %}
+                <div class="col-md-3">
+                    {% if max_tumbleweed !=50 %}
+                        <p>Tumbleweed</p>
+                        <input type="range" id="slider_tumbleweed" name="slider_tumbleweed" min="0" max="21"
+                               value="{{ max_tumbleweed }}" step="1">
+                        <p><span id="span_tumbleweed"></span></p>
+                    {% endif %}
+                </div>
+            </div>
+
+
         </div>
     </div>
-
-
-</div>
-</div>
-
-
 </body>
 </html>
