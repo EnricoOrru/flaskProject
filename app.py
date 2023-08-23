@@ -41,7 +41,7 @@ def submit():
                            max_dishwasher=SolarProduction.max_hour_dishwasher_global,
                            max_tumbleweed=SolarProduction.max_hour_tumbleweed_global,
                            max_washingmachine=SolarProduction.max_hour_washingmachine_global,
-                           resulted_graph=resulted_production_image)
+                           resulted_graph=resulted_production_image, energy= energy)
 
 
 @app.route('/update_slider', methods=['POST'])

@@ -135,9 +135,9 @@ def main(postcode, nSolar, orientation, angle, date, dishwasherBool, dishwasherP
     list_of_consumption_tumbleweed = [1.92, 79.93, 307.88, 6.52, 6.1, 6.47, 7.17, 7.23, 7.68, 162.3, 285.72, 9.22]
     list_of_consumption_washingmachine = [0, 1, 0.18, 13.05, 20.62, 18.12, 11.62, 11.88, 82.38, 358.22, 1, 0]
 
-    list_of_consumption_dishwasher = multiply_list_by_number(list_of_consumption_dishwasher, 6)
-    list_of_consumption_tumbleweed = multiply_list_by_number(list_of_consumption_tumbleweed, 6)
-    list_of_consumption_washingmachine = multiply_list_by_number(list_of_consumption_washingmachine, 6)
+    # list_of_consumption_dishwasher = multiply_list_by_number(list_of_consumption_dishwasher, 6)
+    # list_of_consumption_tumbleweed = multiply_list_by_number(list_of_consumption_tumbleweed, 6)
+    # list_of_consumption_washingmachine = multiply_list_by_number(list_of_consumption_washingmachine, 6)
 
     for device, (booleanCheck, priority) in sorted_dictionary.items():
         if booleanCheck == "on" and device == "dishwasher":
@@ -152,7 +152,8 @@ def main(postcode, nSolar, orientation, angle, date, dishwasherBool, dishwasherP
                                                                                  list_of_production)
 
     plot_graph(list_of_production_origin, list_of_consumption_dishwasher, list_of_consumption_washingmachine,
-               list_of_consumption_tumbleweed, "List of Production After Consumption" + str(date), max_hour_dishwasher,
+               list_of_consumption_tumbleweed, "List of Production After Consumption " + str(date.date()),
+               max_hour_dishwasher,
                max_hour_washingmachine, max_hour_tumbleweed)
 
     list_of_production_origin_global = list_of_production_origin
@@ -165,7 +166,7 @@ def main(postcode, nSolar, orientation, angle, date, dishwasherBool, dishwasherP
     max_hour_tumbleweed_global = max_hour_tumbleweed
 
     encoded_image = graph_to_image()
-
+    energy = round(energy, 3)
     return energy, encoded_image, list_of_production
 
 
@@ -261,7 +262,8 @@ def callToWeatherAPIFuture(desired_local_start_time):
         desidered_time = unix_times[0]
         for time in unix_times:
             time_in_utc = unix_timestamp_to_utc(time)
-            time_localized = convert_utc_to_timezone(time_in_utc, calculateTimezoneFromLocation(location.latitude, location.longitude))
+            time_localized = convert_utc_to_timezone(time_in_utc, calculateTimezoneFromLocation(location.latitude,
+                                                                                                location.longitude))
             if (
                     time_localized.day == desired_local_start_time.day and time_localized.hour == desired_local_start_time.hour):
                 desidered_time = time
@@ -329,18 +331,23 @@ def convert_to_utc(dt, timezone_str):
 def plot_graph(list_of_production, dishwasher, washingmachine, tumbleweed, title, max_hour_dishwasher,
                max_hour_washingmachine,
                max_hour_tumbleweed):
-    hours = list(range(24))
+    hours = list(range(115))
+    list_of_production = get_interpolation(list_of_production)
     plt.figure()
-    dishwasher = shrink_list_by_number_and_average(dishwasher)
-    washingmachine = shrink_list_by_number_and_average(washingmachine)
-    tumbleweed = shrink_list_by_number_and_average(tumbleweed)
+    # dishwasher = shrink_list_by_number_and_average(dishwasher)
+    # washingmachine = shrink_list_by_number_and_average(washingmachine)
+    # tumbleweed = shrink_list_by_number_and_average(tumbleweed)
+
     if max_hour_dishwasher != 50:
-        dishwasher = [0] * (max_hour_dishwasher + 1) + dishwasher + [0] * (23 - max_hour_dishwasher - len(dishwasher))
+        inserted_dishwasher = [0] * ((max_hour_dishwasher * 5) - 1) + dishwasher
+        dishwasher = inserted_dishwasher + [0] * (115 - len(inserted_dishwasher))
     if max_hour_washingmachine != 50:
-        washingmachine = [0] * (max_hour_washingmachine + 1) + washingmachine + [0] * (
-                23 - max_hour_washingmachine - len(washingmachine))
+        inserted_washingmachine = [0] * ((max_hour_washingmachine * 5) - 1) + washingmachine
+        washingmachine = inserted_washingmachine + [0] * (115 - len(inserted_washingmachine))
     if max_hour_tumbleweed != 50:
-        tumbleweed = [0] * (max_hour_tumbleweed + 1) + tumbleweed + [0] * (23 - max_hour_tumbleweed - len(tumbleweed))
+        inserted_tumbleweed = [0] * ((max_hour_tumbleweed * 5) - 1) + tumbleweed
+        tumbleweed = inserted_tumbleweed + [0] * (115 - len(inserted_tumbleweed))
+
     plt.plot(hours, list_of_production, label='Curve Of Production')
     if max_hour_dishwasher != 50:
         plt.plot(hours, dishwasher, color="orange", label='Curve Of Consumption Dishwasher')
@@ -354,15 +361,16 @@ def plot_graph(list_of_production, dishwasher, washingmachine, tumbleweed, title
     plt.title(title)
 
     plt.legend()
-    plt.xticks(hours)
+    plt.xticks(np.arange(0, 115, step=5), np.arange(0, 23, step=1))
+    #plt.xticks(hours)
     if max_hour_tumbleweed != 50:
-        plt.axvline(x=max_hour_tumbleweed, color='r', linestyle='--',
+        plt.axvline(x=(max_hour_tumbleweed * 5), color='r', linestyle='--',
                     label=f'Start Hour of Dishwasher: {max_hour_tumbleweed}')
     if max_hour_dishwasher != 50:
-        plt.axvline(x=max_hour_dishwasher, color='orange', linestyle='--',
+        plt.axvline(x=(max_hour_dishwasher * 5), color='orange', linestyle='--',
                     label=f'Start Hour of Dishwasher: {max_hour_dishwasher}')
     if max_hour_washingmachine != 50:
-        plt.axvline(x=max_hour_washingmachine, color='green', linestyle='--',
+        plt.axvline(x=(max_hour_washingmachine * 5), color='green', linestyle='--',
                     label=f'Start Hour of Dishwasher: {max_hour_washingmachine}')
 
 
@@ -456,7 +464,6 @@ def shrink_list_by_number_and_average(list):
 
 def get_resulting_production(list_of_production, dishwasher, washingmachine, tumbleweed, start_hour_dishwasher,
                              start_hour_washingmachine, start_hour_tumbleweed):
-
     for device, (booleanCheck, priority) in priority_dict.items():
         if booleanCheck == "on" and device == "dishwasher":
             list_of_production = get_production_after_consumption(list_of_production, dishwasher,
@@ -476,7 +483,7 @@ def get_production_after_consumption(list_of_production, list_of_consumption, st
     list_of_production_copy = list(list_of_production)
     list_of_consumption = shrink_list_by_number_and_average(list_of_consumption)
     list_of_production_copy[start] -= list_of_consumption[0]
-    list_of_production_copy[start+1] -= list_of_consumption[1]
+    list_of_production_copy[start + 1] -= list_of_consumption[1]
 
     return list_of_production_copy
 
@@ -486,8 +493,13 @@ def multiply_list_by_number(lst, number):
     return multiplied_list
 
 
+def get_interpolation(list_of_production):
+    interpolated_list = list()
 
+    for i in range(len(list_of_production) - 1):
+        start = list_of_production[i]
+        stop = list_of_production[i + 1]
+        interpolated_values = np.linspace(start, stop, num=6)
+        interpolated_list.extend(interpolated_values[:-1])
 
-
-
-
+    return interpolated_list
