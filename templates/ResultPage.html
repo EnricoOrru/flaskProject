@@ -13,8 +13,8 @@
                 $('#span_dishwasher').text({{ max_dishwasher }});
             if (elementExists("span_washingmachine"))
                 $('#span_washingmachine').text({{ max_washingmachine }});
-            if (elementExists("span_tumbleweed"))
-                $('#span_tumbleweed').text({{ max_tumbleweed}});
+            if (elementExists("span_tv"))
+                $('#span_tv').text({{ max_tv}});
 
             function update_graph(slider) {
                 var sliderValue = slider.val()
@@ -22,15 +22,15 @@
                     $('#span_dishwasher').text(get_slider_value("slider_dishwasher"));
                 if (elementExists("span_washingmachine"))
                     $('#span_washingmachine').text(get_slider_value("slider_washingmachine"));
-                if (elementExists("span_tumbleweed"))
-                    $('#span_tumbleweed').text(get_slider_value("slider_tumbleweed"));
+                if (elementExists("span_tv"))
+                    $('#span_tv').text(get_slider_value("slider_tv"));
                 $.ajax({
                     type: 'POST',
                     url: '/update_slider',
                     data: {
                         slider_dishwasher: get_slider_value("slider_dishwasher"),
                         slider_washingmachine: get_slider_value("slider_washingmachine"),
-                        slider_tumbleweed: get_slider_value("slider_tumbleweed")
+                        slider_tv: get_slider_value("slider_tv")
                     },
                     success: function (response) {
                         $("#graph1").attr("src", "data:image/png;base64," + response);
@@ -45,7 +45,7 @@
                     data: {
                         slider_dishwasher: get_slider_value("slider_dishwasher"),
                         slider_washingmachine: get_slider_value("slider_washingmachine"),
-                        slider_tumbleweed: get_slider_value("slider_tumbleweed")
+                        slider_tv: get_slider_value("slider_tv")
                     },
                     success: function (response) {
                         $("#graph2").attr("src", "data:image/png;base64," + response);
@@ -183,11 +183,11 @@
                 </div>
 
                 <div class="col-md-3">
-                    {% if max_tumbleweed !=50 %}
-                        <p>Tumbleweed</p>
-                        <input type="range" class="styled-slider" id="slider_tumbleweed" name="slider_tumbleweed" min="0" max="21"
-                               value="{{ max_tumbleweed }}" step="1">
-                        <p><span id="span_tumbleweed"></span></p>
+                    {% if max_tv !=50 %}
+                        <p>TV</p>
+                        <input type="range" class="styled-slider" id="slider_tv" name="slider_tv" min="0" max="21"
+                               value="{{ max_tv }}" step="1">
+                        <p><span id="span_tv"></span></p>
                     {% endif %}
 
                 </div>
